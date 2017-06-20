@@ -1,64 +1,52 @@
 'use strict';
 
-const gulp         = require('gulp');
-const sass         = require('gulp-sass');
+const gulp = require('gulp');
+const watch = require('gulp-watch');
+const sass = require('gulp-sass');
 const autoprefixer = require('gulp-autoprefixer');
-const rename       = require('gulp-rename');
-const sourcemaps   = require('gulp-sourcemaps');
-const browserSync  = require('browser-sync').create();
-const gutil        = require('gulp-util');
-const ftp          = require('vinyl-ftp');
-const config       = require('./config.js');
+const rename = require('gulp-rename');
+const sourcemaps = require('gulp-sourcemaps');
+const clean = require('del');
+
+process.env.NODE_ENV = 'development';
+
+// Path, related to the root,
+// where both .css and .scss style files
+// will be stored
+const path = './styles/';
 
 gulp.task('sass', function () {
-  return gulp.src('./styles/scss/main.scss')
-    .pipe(sourcemaps.init())
+  if (process.env.NODE_ENV === 'development') {
+    return gulp.src(path + 'scss/main.scss')
+      .pipe(sourcemaps.init())
+      .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+      .pipe(rename('style.css'))
+      .pipe(sourcemaps.write('./'))
+      .pipe(gulp.dest(path + 'css'));
+  }
+
+  return gulp.src(path + 'scss/main.scss')
     .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
     .pipe(autoprefixer({
       browsers: ['last 5 versions']
     }))
     .pipe(rename('style.css'))
-    .pipe(sourcemaps.write('./maps'))
-    .pipe(gulp.dest('./styles/css'));
+    .pipe(gulp.dest(path + 'css'));
 });
 
-gulp.task('deploy-dev', ['sass'], function() {
-  const conn = ftp.create({
-    host:     config.settings.host,
-    user:     config.settings.user,
-    password: config.settings.password,
-    parallel: 10,
-    log:      gutil.log
+gulp.task('sass:watch', function () {
+  watch(path + 'scss/**/*.scss', function () {
+    gulp.start('sass')
   });
-
-  const globs = [
-    '**/*',
-    '*',
-    '!node_modules/**',
-    '!node_modules',
-    '!.git/**'
-  ];
-
-  return gulp.src(globs, {base: '.', buffer: false})
-    .pipe(conn.newer(config.settings.path))
-    .pipe(conn.dest(config.settings.path));
 });
 
-gulp.task('sass:watch', ['deploy-dev'], function (done) {
-  browserSync.reload();
-  done();
+gulp.task('build', function () {
+  process.env.NODE_ENV = 'production';
+
+  clean(path + 'css/style.css.map')
+    .then(function () {
+      gulp.start('sass');
+    });
 });
 
-gulp.task('serve', ['deploy-dev'], function () {
-  browserSync.init({
-    proxy: config.settings.url,
-    port: 3000,
-    open: 'external',
-    notify: true,
-    ghost: true
-  });
-
-  gulp.watch('./styles/scss/**/*.scss', ['sass:watch']);
-});
-
-gulp.task('default', ['serve']);
+gulp.task('default', ['sass:watch']);

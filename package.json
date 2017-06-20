@@ -1,21 +1,17 @@
 {
   "name": "scss-starter-kit",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "",
-  "scripts": {
-    "dev": "gulp"
-  },
-  "author": "",
+  "author": "V. Saienko",
   "license": "ISC",
   "devDependencies": {
-    "browser-sync": "^2.18.7",
+    "del": "^3.0.0",
     "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.1",
+    "gulp-autoprefixer": "^4.0.0",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^3.1.0",
-    "gulp-sourcemaps": "^2.4.1",
-    "gutil": "^1.6.4",
-    "vinyl-ftp": "^0.6.0"
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-watch": "^4.3.11"
   },
   "dependencies": {}
 }
