@@ -12,8 +12,10 @@ const path = './catalog/view/theme/default/stylesheet/';
 6. Repeat steps 3, 4 and 5 in every project.
 
 ### Usage
-* For **development** run `gulp` in your project where `gulpfile.js` is located. It runs watch task. Whenever you change `.scss` files it generates a new `style.css` with sourcemaps. `Autoprefixer` is disabled.
+* For **development** run `gulp` in your project where `gulpfile.js` is located. It runs watch task and generates a new `style.css` with sourcemaps whenever you change and save `.scss` files. `Autoprefixer` is disabled.
 * For **production** run `gulp build` in the command line. It removes sourcemaps, turns on `autoprefixer`.
+
+Also you can use your IDE panel. PHPStorm has a good one. Just double click the task name to run it or press &#9658; button to run the default one.
 
 ### Styles structure
 ```
