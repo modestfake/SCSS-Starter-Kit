@@ -23,11 +23,11 @@ styles (or your path)
 ├── css
 |    ├─ style.css
 |    └─ style.css.map
-├── scss
-|    ├─ helpers
-|    ├─ folder1
-|    └─ folder2
-|    main.scss
+└── scss
+     ├─ helpers
+     ├─ folder1
+     └─ folder2
+     main.scss
 
 ```
 
