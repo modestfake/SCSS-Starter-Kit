@@ -15,7 +15,7 @@ const path = './catalog/view/theme/default/stylesheet/';
 * For **development** run `gulp` in your project where `gulpfile.js` is located. It runs watch task and generates a new `style.css` with sourcemaps whenever you change and save `.scss` files. `Autoprefixer` is disabled.
 * For **production** run `gulp build` in the command line. It removes sourcemaps, turns on `autoprefixer`.
 
-Also you can use your IDE panel. PHPStorm has a good one. Just double click the task name to run it or press &#9658; button to run the default one.
+Also you can use your IDE panel. PHPStorm has a good one. Just double click the task name to run it or press :arrow_forward: button to run the default one.
 
 ### Styles structure
 ```
@@ -44,4 +44,4 @@ _buttons.scss
 @import 'buttons.scss';
 ```
 
-Notice! Order matters.
+:warning: Notice! Order matters.
