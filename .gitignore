@@ -1,4 +1,4 @@
 .idea
-/node_modules
-/styles/css
+node_modules
+build
 package-lock.json
