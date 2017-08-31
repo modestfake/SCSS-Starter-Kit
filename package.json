@@ -10,7 +10,8 @@
   },
   "scripts": {
     "start": "node node_modules/gulp/bin/gulp",
-    "build": "node node_modules/gulp/bin/gulp build"
+    "build": "node node_modules/gulp/bin/gulp build",
+    "serve": "node node_modules/gulp/bin/gulp serve"
   },
   "devDependencies": {
     "del": "^3.0.0",
@@ -26,6 +27,7 @@
     "gulp-svg-sprites": "^4.1.2",
     "gulp-util": "^3.0.8",
     "gulp-watch": "^4.3.11",
+    "gulp-webserver": "^0.9.1",
     "lodash.merge": "^4.6.0",
     "standard": "^10.0.3"
   },

@@ -7,6 +7,7 @@ const sourcemaps = require('gulp-sourcemaps')
 const clean = require('del')
 const svgSprite = require('gulp-svg-sprites')
 const gutil = require('gulp-util')
+var webserver = require('gulp-webserver')
 
 const { src, build } = require('./configs')
 
@@ -75,6 +76,15 @@ gulp.task('build', () => {
   clean(`${build.path + build.css}/style.css.map`)
     .then(() => gulp.start('sass'))
     .then(() => gulp.start('sprite'))
+})
+
+gulp.task('serve', () => {
+  gulp.src('./')
+    .pipe(webserver({
+      livereload: true,
+      fallback: './index.html',
+      open: true
+    }))
 })
 
 gulp.task('default', ['sass:watch', 'svg:watch'])
