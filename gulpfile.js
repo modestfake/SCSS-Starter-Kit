@@ -1,44 +1,66 @@
 const gulp = require('gulp')
-const watch = require('gulp-watch')
-const sass = require('gulp-sass')
-const autoprefixer = require('gulp-autoprefixer')
-const rename = require('gulp-rename')
-const sourcemaps = require('gulp-sourcemaps')
+const pump = require('pump')
+const browserify = require('browserify')
 const clean = require('del')
-const svgSprite = require('gulp-svg-sprites')
-const gutil = require('gulp-util')
-var webserver = require('gulp-webserver')
 
-const { src, build } = require('./configs')
+const gulpLoadPlugins = require('gulp-load-plugins')
+const $ = gulpLoadPlugins()
+
+const { src, build, styles, js, svg } = require('./config')
 
 process.env.NODE_ENV = 'development'
 
-// Path, related to the root,
-// where both .css and .scss style files
-// will be stored
-
 gulp.task('sass', () => {
   if (process.env.NODE_ENV === 'development') {
-    return gulp.src(`${src.path + src.scss}/main.scss`)
-      .pipe(sourcemaps.init())
-      .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-      .pipe(rename('style.css'))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(`${build.path + build.css}`))
+    return gulp.src(`${src}/${styles.src}/main.scss`)
+      .pipe($.sourcemaps.init())
+      .pipe($.sass({ outputStyle: 'compressed' }).on('error', $.sass.logError))
+      .pipe($.rename('style.css'))
+      .pipe($.size({title: 'styles'}))
+      .pipe($.sourcemaps.write('./'))
+      .pipe(gulp.dest(`${build}/${styles.build}`))
   }
 
-  return gulp.src(`${src.path + src.scss}/main.scss`)
-    .pipe(sass({ outputStyle: 'compressed' }).on('error', sass.logError))
-    .pipe(autoprefixer({
-      browsers: ['last 5 versions']
+  const AUTOPREFIXER_BROWSERS = [
+    'ie >= 10',
+    'ie_mob >= 10',
+    'ff >= 30',
+    'chrome >= 34',
+    'safari >= 7',
+    'opera >= 23',
+    'ios >= 7',
+    'android >= 4.4',
+    'bb >= 10'
+  ]
+
+  return gulp.src(`${src}/${styles.src}/main.scss`)
+    .pipe($.sass({ outputStyle: 'compressed' }).on('error', $.sass.logError))
+    .pipe($.autoprefixer({
+      browsers: AUTOPREFIXER_BROWSERS
     }))
-    .pipe(rename('style.css'))
-    .pipe(gulp.dest(build.path + build.css))
+    .pipe($.size({title: 'styles'}))
+    .pipe($.rename('style.css'))
+    .pipe(gulp.dest(`${build}/${styles.build}`))
+})
+
+gulp.task('js', () => {
+  pump([
+    gulp.src(`${src}/${js.src}/*.js`, {read: false}),
+    $.tap(file => {
+      $.util.log(`bundling ${file.path}`)
+      file.contents = browserify(file.path, {debug: true}).bundle()
+    }),
+    $.buffer(),
+    $.sourcemaps.init({ loadMaps: true }),
+    $.uglify(),
+    $.sourcemaps.write('./'),
+    gulp.dest(`${build}/${js.build}`)
+  ])
 })
 
 gulp.task('sprite', () => {
-  return gulp.src(`${src.path + src.svg}/*.svg`)
-    .pipe(svgSprite({
+  return gulp.src(`${src}/${svg.src}/*.svg`)
+    .pipe($.svgSprites({
       mode: 'symbols',
       common: 'svg',
       svgId: 'svg-%f',
@@ -46,11 +68,11 @@ gulp.task('sprite', () => {
       svg: { symbols: 'symbols.svg' },
       templates: { scss: true }
     }))
-    .pipe(gulp.dest(build.path + build.svg))
+    .pipe(gulp.dest(`${build}/${svg.build}`))
 })
 
-const { cyan, yellow } = gutil.colors
-const logChange = e => gutil.log(
+const { cyan, yellow } = $.util.colors
+const logChange = e => $.util.log(
   'File',
   cyan(e.path.split('\\').pop()),
   yellow(e.event)
@@ -58,33 +80,41 @@ const logChange = e => gutil.log(
 
 // Watchers
 gulp.task('sass:watch', () => {
-  watch(`${src.path + src.scss}/**/*.scss`, () => {
+  $.watch(`${src}/${styles.src}/**/*.scss`, () => {
     gulp.start('sass')
   })
 })
 
+gulp.task('js:watch', () => {
+  $.watch(`${src}/${js.src}/**/*.js`, () => {
+    gulp.start('js')
+  })
+})
+
 gulp.task('svg:watch', () => {
-  watch(`${src.path + src.svg}/*.svg`, e => {
+  $.watch(`${src}/${svg.src}/*.svg`, e => {
     logChange(e)
     gulp.start('sprite')
   })
 })
 
-gulp.task('build', () => {
+// Util tasks
+gulp.task('clean', () => {
   process.env.NODE_ENV = 'production'
-
-  clean(`${build.path + build.css}/style.css.map`)
-    .then(() => gulp.start('sass'))
-    .then(() => gulp.start('sprite'))
+  clean.sync([
+    `${build}/${styles.build}/*`,
+    `${build}/${svg.build}/*`
+  ], { force: true })
 })
 
 gulp.task('serve', () => {
   gulp.src('./')
-    .pipe(webserver({
+    .pipe($.webserver({
       livereload: true,
       fallback: './index.html',
       open: true
     }))
 })
 
-gulp.task('default', ['sass:watch', 'svg:watch'])
+gulp.task('default', ['sass:watch', 'js:watch', 'svg:watch'])
+gulp.task('build', ['clean', 'sass', 'js', 'sprite'])
